@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tutor Dungeon - Find Expert Tutors Near You</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+
+        :root {
+            --primary: #E50914;
+            --dark: #141414;
+            --light: #F5F5F5;
+            --gray: #808080;
+            --card-bg: #181818;
+        }
+
+        body {
+            background-color: var(--dark);
+            color: var(--light);
+            overflow-x: hidden;
+        }
+
+        /* Header Styles */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 20px 4%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            transition: background-color 0.3s;
+            background-color: rgba(20, 20, 20, 0.9);
+        }
+
+        .scrolled {
+            background-color: var(--dark);
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            background: linear-gradient(to right, var(--), #8cd200y);
+            color: var(--light);            
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+
+        .logo i {
+            margin-right: 10px;
+        }
+
+        nav ul {
+            display: flex;
+            list-style: none;
+        }
+
+        nav ul li {
+            margin-left: 20px;
+        }
+
+        nav ul li a {
+            color: var(--light);
+            text-decoration: none;
+            font-size: 16px;
+            transition: color 0.3s;
+        }
+
+        nav ul li a:hover {
+            color: var(--primary);
+        }
+
+        .auth-buttons button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-left: 10px;
+            transition: background-color 0.3s;
+        }
+
+        .auth-buttons button:hover {
+            background-color: #ff0a16;
+        }
+
+        /* Banner Styles */
+        .banner {
+            height: 90vh;
+            position: relative;
+            background: linear-gradient(to bottom, rgba(20, 20, 20, 0.5) 0%, rgba(20, 20, 20, 1) 100%), 
+                        url('https://images.unsplash.com/photo-1509062522246-3755977927d7?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            align-items: center;
+            padding: 0 4%;
+        }
+
+        .banner-content {
+            max-width: 650px;
+            z-index: 1;
+        }
+
+        .banner-title {
+            font-size: 64px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .banner-description {
+            font-size: 20px;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+
+        .banner-buttons {
+            display: flex;
+            gap: 15px;
+        }
+
+        .banner-button {
+            background-color: rgba(51, 51, 51, 0.7);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .banner-button i {
+            margin-right: 10px;
+        }
+
+        .banner-button.primary {
+            background-color: var(--primary);
+        }
+
+        .banner-button:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .banner-button.primary:hover {
+            background-color: #ff0a16;
+        }
+
+        /* Tutor Categories */
+        .section-title {
+            font-size: 24px;
+            margin: 40px 4% 20px;
+            font-weight: bold;
+        }
+
+        .tutor-row {
+            padding: 0 4%;
+            margin-bottom: 40px;
+        }
+
+        .tutor-container {
+            display: flex;
+            overflow-x: auto;
+            gap: 15px;
+            padding: 10px 0;
+            scrollbar-width: thin;
+            scrollbar-color: var(--primary) var(--dark);
+        }
+
+        .tutor-container::-webkit-scrollbar {
+            height: 8px;
+        }
+
+        .tutor-container::-webkit-scrollbar-track {
+            background: var(--dark);
+        }
+
+        .tutor-container::-webkit-scrollbar-thumb {
+            background-color: var(--primary);
+            border-radius: 20px;
+        }
+
+        /* Tutor Cards */
+        .tutor-card {
+            min-width: 220px;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .tutor-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        .tutor-card img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        .tutor-info {
+            padding: 15px;
+        }
+
+        .tutor-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .tutor-subject {
+            color: var(--primary);
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .tutor-rating {
+            color: #FFD700;
+            margin-bottom: 8px;
+        }
+
+        .tutor-price {
+            font-size: 16px;
+            font-weight: bold;
+        }
+
+        /* Login Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 40px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 450px;
+            position: relative;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            color: var(--light);
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .modal-title {
+            font-size: 32px;
+            margin-bottom: 30px;
+            color: var(--primary);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: #333;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 16px;
+        }
+
+        .modal-button {
+            width: 100%;
+            padding: 12px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .modal-button:hover {
+            background-color: #ff0a16;
+        }
+
+        .form-footer {
+            text-align: center;
+            margin-top: 20px;
+            color: var(--gray);
+            font-size: 14px;
+        }
+
+        .form-footer a {
+            color: var(--primary);
+            text-decoration: none;
+        }
+
+        /* Footer */
+        footer {
+            padding: 50px 4% 20px;
+            background-color: #000;
+            margin-top: 50px;
+        }
+
+        .footer-content {
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+
+        .footer-column {
+            min-width: 200px;
+            margin-bottom: 20px;
+        }
+
+        .footer-column h3 {
+            color: var(--gray);
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+
+        .footer-column ul {
+            list-style: none;
+        }
+
+        .footer-column ul li {
+            margin-bottom: 10px;
+        }
+
+        .footer-column ul li a {
+            color: var(--gray);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .footer-column ul li a:hover {
+            color: var(--light);
+        }
+
+        .copyright {
+            text-align: center;
+            color: var(--gray);
+            font-size: 14px;
+            padding-top: 20px;
+            border-top: 1px solid #333;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .banner-title {
+                font-size: 44px;
+            }
+            
+            .banner-description {
+                font-size: 18px;
+            }
+            
+            nav ul {
+                display: none;
+            }
+            
+            .banner-buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <a href="#" class="logo">
+            <i class="fas fa-chalkboard-teacher"></i> Tutor Dungeon
+        </a>
+        <nav>
+            <ul>
+                <li><a href="#"><i class="fas fa-home"></i> Home</a></li>
+                <li><a href="#"><i class="fas fa-search"></i> Find Tutors</a></li>
+                <li><a href="#"><i class="fas fa-star"></i> Top Rated</a></li>
+                <li><a href="#"><i class="fas fa-question-circle"></i> How It Works</a></li>
+            </ul>
+        </nav>
+        <div class="auth-buttons">
+            <button id="loginBtn">Sign In</button>
+            <button id="registerBtn">Register</button>
+        </div>
+    </header>
+
+    <!-- Main Banner -->
+    <section class="banner" id="banner">
+        <div class="banner-content">
+            <h1 class="banner-title">Find the Perfect Tutor</h1>
+            <p class="banner-description">Connect with expert tutors in any subject, from mathematics to music, right in your neighborhood. Personalized one-on-one sessions tailored to your learning style.</p>
+            <div class="banner-buttons">
+                <button class="banner-button primary" id="findTutorBtn">
+                    <i class="fas fa-search"></i> Find Tutors Near Me
+                </button>
+                <button class="banner-button" id="howItWorksBtn">
+                    <i class="fas fa-play-circle"></i> How It Works
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tutor Categories -->
+    <h2 class="section-title">Mathematics Tutors</h2>
+    <div class="tutor-row">
+        <div class="tutor-container" id="mathTutors"></div>
+    </div>
+
+    <h2 class="section-title">Science Tutors</h2>
+    <div class="tutor-row">
+        <div class="tutor-container" id="scienceTutors"></div>
+    </div>
+
+    <h2 class="section-title">Language Tutors</h2>
+    <div class="tutor-row">
+        <div class="tutor-container" id="languageTutors"></div>
+    </div>
+
+    <h2 class="section-title">Top Rated Tutors</h2>
+    <div class="tutor-row">
+        <div class="tutor-container" id="topRatedTutors"></div>
+    </div>
+
+    <!-- Login Modal -->
+    <div class="modal" id="loginModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeLogin">&times;</span>
+            <h2 class="modal-title">Sign In</h2>
+            <form id="loginForm">
+                <div class="form-group">
+                    <label for="loginEmail">Email or Username</label>
+                    <input type="text" id="loginEmail" placeholder="Enter your email or username" required>
+                </div>
+                <div class="form-group">
+                    <label for="loginPassword">Password</label>
+                    <input type="password" id="loginPassword" placeholder="Enter your password" required>
+                </div>
+                <button type="submit" class="modal-button">Sign In</button>
+            </form>
+            <div class="form-footer">
+                <p>New to Tutor Dungeon? <a href="#" id="switchToRegister">Sign up now</a>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Modal -->
+    <div class="modal" id="registerModal">
+        <div class="modal-content">
+            <span class="close-modal" id="closeRegister">&times;</span>
+            <h2 class="modal-title">Create Account</h2>
+            <form id="registerForm">
+                <div class="form-group">
+                    <label for="registerName">Full Name</label>
+                    <input type="text" id="registerName" placeholder="Enter your full name" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerEmail">Email Address</label>
+                    <input type="email" id="registerEmail" placeholder="Enter your email" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerPassword">Password</label>
+                    <input type="password" id="registerPassword" placeholder="Create a password" required>
+                </div>
+                <div class="form-group">
+                    <label for="registerType">I am a:</label>
+                    <select id="registerType" style="width: 100%; padding: 12px 15px; background-color: #333; border: none; border-radius: 4px; color: white; font-size: 16px;">
+                        <option value="student">Student looking for a tutor</option>
+                        <option value="tutor">Tutor offering services</option>
+                    </select>
+                </div>
+                <button type="submit" class="modal-button">Create Account</button>
+            </form>
+            <div class="form-footer">
+                <p>Already have an account? <a href="#" id="switchToLogin">Sign in now</a>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-column">
+                <h3>Get to Know Us</h3>
+                <ul>
+                    <li><a href="#">About Tutor Dungeon</a></li>
+                    <li><a href="#">How It Works</a></li>
+                    <li><a href="#">Careers</a></li>
+                    <li><a href="#">Press</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Connect With Tutors</h3>
+                <ul>
+                    <li><a href="#">Find a Tutor</a></li>
+                    <li><a href="#">Become a Tutor</a></li>
+                    <li><a href="#">Tutor Resources</a></li>
+                    <li><a href="#">Safety Guidelines</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Support</h3>
+                <ul>
+                    <li><a href="#">Help Center</a></li>
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Community Forums</a></li>
+                </ul>
+            </div>
+            <div class="footer-column">
+                <h3>Follow Us</h3>
+                <ul>
+                    <li><a href="#"><i class="fab fa-facebook"></i> Facebook</a></li>
+                    <li><a href="#"><i class="fab fa-twitter"></i> Twitter</a></li>
+                    <li><a href="#"><i class="fab fa-instagram"></i> Instagram</a></li>
+                    <li><a href="#"><i class="fab fa-linkedin"></i> LinkedIn</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="copyright">
+            <p>&copy; 2023 Tutor Dungeon. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Tutor data (simulating tutor.json)
+        const tutors = [
+            {
+                id: 1,
+                name: "Dr. Sarah Johnson",
+                subject: "Mathematics",
+                specialty: "Calculus & Algebra",
+                rating: 4.9,
+                price: "$45/hr",
+                location: "Downtown",
+                experience: "8 years",
+                image: "https://images.unsplash.com/photo-1580894732444-8ecded7900cd?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+            },
+            {
+                id: 2,
+                name: "Michael Chen",
+                subject: "Mathematics",
+                specialty: "Geometry & Trigonometry",
+                rating: 4.7,
+                price: "$35/hr",
+                location: "Northside",
+                experience: "5 years",
+                image: "https://images.unsplash.com/photo-1568602471122-7832951cc4c5?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+            },
+            {
+                id: 3,
+                name: "Prof. Robert Williams",
+                subject: "Mathematics",
+                specialty: "Statistics & Probability",
+                rating: 4.8,
+                price: "$50/hr",
+                location: "East End",
+                experience: "12 years",
+                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+            },
+            {
+                id: 4,
+                name: "Dr. Lisa Parker",
+                subject: "Science",
+                specialty: "Chemistry",
+                rating: 4.9,
+                price: "$55/hr",
+                location: "Westside",
+                experience: "10 years",
+                image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+            },
+            {
+                id: 5,
+                name: "David Kim",
+                subject: "Science",
+                specialty: "Physics",
+                rating: 4.6,
+                price: "$40/hr",
+                location: "Central District",
+                experience: "6 years",
+                image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+            },
+            {
+                id: 6,
+                name: "Dr. Maria Rodriguez",
+                subject: "Science",
+                specialty: "Biology",
+                rating: 4.8,
+                price: "$48/hr",
+                location: "Southside",
+                experience: "9 years",
+                image: "https://images.unsplash.com/photo-1544725176-7c40e5a71c5e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+            },
+            {
+                id: 7,
+                name: "Sophie Martin",
+                subject: "Language",
+                specialty: "French & Spanish",
+                rating: 4.7,
+                price: "$38/hr",
+                location: "Midtown",
+                experience: "7 years",
+                image: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+            },
+            {
+                id: 8,
+                name: "James Wilson",
+                subject: "Language",
+                specialty: "English Literature",
+                rating: 4.9,
+                price: "$42/hr",
+                location: "Uptown",
+                experience: "11 years",
+                image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+            },
+            {
+                id: 9,
+                name: "Emma Thompson",
+                subject: "Language",
+                specialty: "German & Italian",
+                rating: 4.5,
+                price: "$36/hr",
+                location: "Riverside",
+                experience: "4 years",
+                image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+            },
+            {
+                id: 10,
+                name: "Dr. Alexander Grant",
+                subject: "Mathematics",
+                specialty: "Advanced Calculus",
+                rating: 5.0,
+                price: "$60/hr",
+                location: "University District",
+                experience: "15 years",
+                image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?ixlib=rb-4.0.3&auto=format&fit=crop&w=500&q=80"
+            }
+        ];
+
+        // DOM Elements
+        const header = document.getElementById('header');
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const loginModal = document.getElementById('loginModal');
+        const registerModal = document.getElementById('registerModal');
+        const closeLogin = document.getElementById('closeLogin');
+        const closeRegister = document.getElementById('closeRegister');
+        const switchToRegister = document.getElementById('switchToRegister');
+        const switchToLogin = document.getElementById('switchToLogin');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
+        const findTutorBtn = document.getElementById('findTutorBtn');
+        const howItWorksBtn = document.getElementById('howItWorksBtn');
+
+        // Header scroll effect
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 50) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Modal controls
+        loginBtn.addEventListener('click', () => {
+            loginModal.style.display = 'flex';
+            registerModal.style.display = 'none';
+        });
+
+        registerBtn.addEventListener('click', () => {
+            registerModal.style.display = 'flex';
+            loginModal.style.display = 'none';
+        });
+
+        closeLogin.addEventListener('click', () => {
+            loginModal.style.display = 'none';
+        });
+
+        closeRegister.addEventListener('click', () => {
+            registerModal.style.display = 'none';
+        });
+
+        switchToRegister.addEventListener('click', (e) => {
+            e.preventDefault();
+            loginModal.style.display = 'none';
+            registerModal.style.display = 'flex';
+        });
+
+        switchToLogin.addEventListener('click', (e) => {
+            e.preventDefault();
+            registerModal.style.display = 'none';
+            loginModal.style.display = 'flex';
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === loginModal) {
+                loginModal.style.display = 'none';
+            }
+            if (e.target === registerModal) {
+                registerModal.style.display = 'none';
+            }
+        });
+
+        // Form submissions
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // In a real app, you would send this to a server
+            console.log('Login attempt with:', { email, password });
+            alert('Login functionality would connect to backend in a real application.');
+            
+            // For demo purposes
+            loginModal.style.display = 'none';
+            alert('Welcome back! You are now signed in.');
+        });
+
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('registerName').value;
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const type = document.getElementById('registerType').value;
+            
+            // In a real app, you would send this to a server
+            console.log('Registration attempt with:', { name, email, password, type });
+            
+            // For demo purposes
+            registerModal.style.display = 'none';
+            alert(`Account created successfully! Welcome to Tutor Dungeon, ${name}.`);
+        });
+
+        // Banner button actions
+        findTutorBtn.addEventListener('click', () => {
+            alert('Searching for tutors near you... This would use geolocation in a real application.');
+            // Scroll to tutor section
+            document.querySelector('.section-title').scrollIntoView({ behavior: 'smooth' });
+        });
+
+        howItWorksBtn.addEventListener('click', () => {
+            alert('How It Works video would play here. This is a demo version.');
+        });
+
+        // Render tutor cards
+        function renderTutorCards(tutorsArray, containerId) {
+            const container = document.getElementById(containerId);
+            container.innerHTML = '';
+            
+            tutorsArray.forEach(tutor => {
+                const stars = '★'.repeat(Math.floor(tutor.rating)) + '☆'.repeat(5 - Math.floor(tutor.rating));
+                
+                const card = document.createElement('div');
+                card.className = 'tutor-card';
+                card.innerHTML = `
+                    <img src="${tutor.image}" alt="${tutor.name}">
+                    <div class="tutor-info">
+                        <div class="tutor-name">${tutor.name}</div>
+                        <div class="tutor-subject">${tutor.subject} • ${tutor.specialty}</div>
+                        <div class="tutor-rating">${stars} ${tutor.rating}</div>
+                        <div class="tutor-price">${tutor.price}</div>
+                        <div style="font-size: 12px; color: #aaa; margin-top: 5px;">
+                            <i class="fas fa-map-marker-alt"></i> ${tutor.location} • ${tutor.exexperience} exp.
+                        </div>
+                    </div>
+                `;
+                
+                card.addEventListener('click', () => {
+                    alert(`You selected ${tutor.name}. In a real application, you would see more details and be able to book a session.`);
+                });
+                
+                container.appendChild(card);
+            });
+        }
+
+        // Filter tutors by subject and render
+        const mathTutors = tutors.filter(tutor => tutor.subject === 'Mathematics');
+        const scienceTutors = tutors.filter(tutor => tutor.subject === 'Science');
+        const languageTutors = tutors.filter(tutor => tutor.subject === 'Language');
+        const topRatedTutors = [...tutors].sort((a, b) => b.rating - a.rating).slice(0, 5);
+
+        // Initial render
+        renderTutorCards(mathTutors, 'mathTutors');
+        renderTutorCards(scienceTutors, 'scienceTutors');
+        renderTutorCards(languageTutors, 'languageTutors');
+        renderTutorCards(topRatedTutors, 'topRatedTutors');
+
+        // Simulate tutor.json data storage
+        console.log('Tutor data (simulating tutor.json):', JSON.stringify(tutors, null, 2));
+    </script>
+</body>
+</html>
